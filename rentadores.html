@@ -1,0 +1,120 @@
+
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Comptador de Rentadores</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .botons {
+      margin: 20px;
+    }
+    button {
+      font-size: 1.5em;
+      margin: 10px;
+      padding: 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .color {
+      background: linear-gradient(45deg, red, yellow, green, blue);
+      color: white;
+    }
+    .blanca {
+      background: white;
+      color: black;
+      border: 2px solid black;
+    }
+    .estadistiques {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @media (max-width: 600px) {
+      button {
+        width: 100%;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Comptador de Rentadores</h1>
+  <div class="botons">
+    <button class="color" onclick="registrarRentadora('color')">Rentadora de Color</button>
+    <button class="blanca" onclick="registrarRentadora('blanca')">Rentadora Blanca</button>
+  </div>
+
+  <div class="estadistiques">
+    <h2>Estadístiques</h2>
+    <p id="ultims14"></p>
+    <p id="totals"></p>
+    <h3>Històric Diari (últims 30 dies)</h3>
+    <ul id="historic"></ul>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'rentadores';
+
+    function carregarDades() {
+      const dades = localStorage.getItem(STORAGE_KEY);
+      return dades ? JSON.parse(dades) : [];
+    }
+
+    function guardarDades(dades) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dades));
+    }
+
+    function registrarRentadora(tipus) {
+      const dades = carregarDades();
+      const hui = new Date().toISOString().split('T')[0];
+      const entrada = dades.find(d => d.data === hui) || { data: hui, color: 0, blanca: 0 };
+      if (!dades.includes(entrada)) dades.push(entrada);
+      entrada[tipus]++;
+      guardarDades(dades);
+      actualitzarEstadistiques();
+    }
+
+    function actualitzarEstadistiques() {
+      const dades = carregarDades();
+      const hui = new Date();
+
+      let totalColor = 0, totalBlanca = 0;
+      let ultims14Color = 0, ultims14Blanca = 0;
+      const llista = document.getElementById("historic");
+      llista.innerHTML = "";
+
+      dades.forEach(d => {
+        totalColor += d.color;
+        totalBlanca += d.blanca;
+        const data = new Date(d.data);
+        const diferencia = (hui - data) / (1000 * 60 * 60 * 24);
+
+        if (diferencia <= 14) {
+          ultims14Color += d.color;
+          ultims14Blanca += d.blanca;
+        }
+
+        if (diferencia <= 30) {
+          const li = document.createElement('li');
+          li.textContent = `${d.data}: Color ${d.color}, Blanca ${d.blanca}`;
+          llista.appendChild(li);
+        }
+      });
+
+      document.getElementById("ultims14").textContent = `Últims 14 dies: Color ${ultims14Color}, Blanca ${ultims14Blanca}`;
+      document.getElementById("totals").textContent = `Total des de l'inici: Color ${totalColor}, Blanca ${totalBlanca}`;
+    }
+
+    actualitzarEstadistiques();
+  </script>
+</body>
+</html>
