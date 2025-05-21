@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Comptador de rentadores</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 1rem;
+      font-size: 1.2rem;
+      border-radius: 10px;
+    }
+    .color { background-color: #3ec1d3; color: white; }
+    .blanc { background-color: #eeeeee; }
+    .restar { background-color: #ff6b6b; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Comptador de rentadores</h1>
+  <p>Observatori del nombre de rentadores que es fiquen a la setmana.</p>
+
+  <h2>Afegir rentadores</h2>
+  <button class="color" onclick="afegir('color')">Rentadora de color +</button>
+  <button class="blanc" onclick="afegir('blanc')">Rentadora blanca +</button>
+
+  <h2>Restar rentadores</h2>
+  <button class="restar" onclick="restar('color')">Rentadora de color -</button>
+  <button class="restar" onclick="restar('blanc')">Rentadora blanca -</button>
+
+  <h2>Últims 14 dies</h2>
+  <pre id="dies"></pre>
+
+  <h2>Total acumulat</h2>
+  <pre id="totals"></pre>
+
+  <script>
+    const clau = "rentadores_v1";
+    let dades = JSON.parse(localStorage.getItem(clau)) || [];
+
+    function avuiISO() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function afegir(tipus) {
+      const hui = avuiISO();
+      let trobat = dades.find(e => e.dia === hui);
+      if (!trobat) {
+        trobat = { dia: hui, color: 0, blanc: 0 };
+        dades.push(trobat);
+      }
+      trobat[tipus]++;
+      guardar();
+    }
+
+    function restar(tipus) {
+      const hui = avuiISO();
+      let trobat = dades.find(e => e.dia === hui);
+      if (trobat && trobat[tipus] > 0) {
+        trobat[tipus]--;
+        guardar();
+      }
+    }
+
+    function guardar() {
+      localStorage.setItem(clau, JSON.stringify(dades));
+      mostrar();
+    }
+
+    function mostrar() {
+      const hui = new Date();
+      const fa14 = new Date();
+      fa14.setDate(hui.getDate() - 13);
+
+      const dies = dades.filter(e => new Date(e.dia) >= fa14)
+                        .sort((a, b) => a.dia.localeCompare(b.dia));
+
+      let text = dies.map(e => `${e.dia}: color ${e.color}, blanc ${e.blanc}`).join('\n');
+      document.getElementById("dies").textContent = text || "Encara no s'han registrat rentadores.";
+
+      let totalColor = dades.reduce((acc, e) => acc + e.color, 0);
+      let totalBlanc = dades.reduce((acc, e) => acc + e.blanc, 0);
+      document.getElementById("totals").textContent = `Color: ${totalColor} | Blanc: ${totalBlanc}`;
+    }
+
+    mostrar();
+  </script>
+</body>
+</html>
