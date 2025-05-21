@@ -1,17 +1,16 @@
-
 <!DOCTYPE html>
-<html lang="ca">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Comptador de Rentadores</title>
+  <title>Contador de Lavadoras</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
       padding: 20px;
     }
-    .botons {
+    .botones {
       margin: 20px;
     }
     button {
@@ -26,12 +25,12 @@
       background: linear-gradient(45deg, red, yellow, green, blue);
       color: white;
     }
-    .blanca {
+    .blanco {
       background: white;
       color: black;
       border: 2px solid black;
     }
-    .estadistiques {
+    .stats {
       margin-top: 30px;
       text-align: left;
       max-width: 600px;
@@ -47,74 +46,74 @@
   </style>
 </head>
 <body>
-  <h1>Comptador de Rentadores</h1>
-  <div class="botons">
-    <button class="color" onclick="registrarRentadora('color')">Rentadora de Color</button>
-    <button class="blanca" onclick="registrarRentadora('blanca')">Rentadora Blanca</button>
+  <h1>Contador de Lavadoras</h1>
+  <div class="botones">
+    <button class="color" onclick="registrarLavadora('color')">Lavadora de Color</button>
+    <button class="blanco" onclick="registrarLavadora('blanco')">Lavadora Blanca</button>
   </div>
 
-  <div class="estadistiques">
-    <h2>Estadístiques</h2>
-    <p id="ultims14"></p>
-    <p id="totals"></p>
-    <h3>Històric Diari (últims 30 dies)</h3>
-    <ul id="historic"></ul>
+  <div class="stats">
+    <h2>Estadísticas</h2>
+    <p id="ultimos14"></p>
+    <p id="totales"></p>
+    <h3>Histórico Diario (últimos 30 días)</h3>
+    <ul id="historico"></ul>
   </div>
 
   <script>
-    const STORAGE_KEY = 'rentadores';
+    const STORAGE_KEY = 'lavadoras';
 
-    function carregarDades() {
-      const dades = localStorage.getItem(STORAGE_KEY);
-      return dades ? JSON.parse(dades) : [];
+    function cargarDatos() {
+      const datos = localStorage.getItem(STORAGE_KEY);
+      return datos ? JSON.parse(datos) : [];
     }
 
-    function guardarDades(dades) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dades));
+    function guardarDatos(datos) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
     }
 
-    function registrarRentadora(tipus) {
-      const dades = carregarDades();
-      const hui = new Date().toISOString().split('T')[0];
-      const entrada = dades.find(d => d.data === hui) || { data: hui, color: 0, blanca: 0 };
-      if (!dades.includes(entrada)) dades.push(entrada);
-      entrada[tipus]++;
-      guardarDades(dades);
-      actualitzarEstadistiques();
+    function registrarLavadora(tipo) {
+      const datos = cargarDatos();
+      const hoy = new Date().toISOString().split('T')[0];
+      const entrada = datos.find(d => d.fecha === hoy) || { fecha: hoy, color: 0, blanco: 0 };
+      if (!datos.includes(entrada)) datos.push(entrada);
+      entrada[tipo]++;
+      guardarDatos(datos);
+      actualizarEstadisticas();
     }
 
-    function actualitzarEstadistiques() {
-      const dades = carregarDades();
-      const hui = new Date();
+    function actualizarEstadisticas() {
+      const datos = cargarDatos();
+      const hoy = new Date();
 
-      let totalColor = 0, totalBlanca = 0;
-      let ultims14Color = 0, ultims14Blanca = 0;
-      const llista = document.getElementById("historic");
-      llista.innerHTML = "";
+      let totalColor = 0, totalBlanco = 0;
+      let ultimos14Color = 0, ultimos14Blanco = 0;
+      const lista = document.getElementById("historico");
+      lista.innerHTML = "";
 
-      dades.forEach(d => {
+      datos.forEach(d => {
         totalColor += d.color;
-        totalBlanca += d.blanca;
-        const data = new Date(d.data);
-        const diferencia = (hui - data) / (1000 * 60 * 60 * 24);
+        totalBlanco += d.blanco;
+        const fecha = new Date(d.fecha);
+        const diferencia = (hoy - fecha) / (1000 * 60 * 60 * 24);
 
         if (diferencia <= 14) {
-          ultims14Color += d.color;
-          ultims14Blanca += d.blanca;
+          ultimos14Color += d.color;
+          ultimos14Blanco += d.blanco;
         }
 
         if (diferencia <= 30) {
           const li = document.createElement('li');
-          li.textContent = `${d.data}: Color ${d.color}, Blanca ${d.blanca}`;
-          llista.appendChild(li);
+          li.textContent = `${d.fecha}: Color ${d.color}, Blanco ${d.blanco}`;
+          lista.appendChild(li);
         }
       });
 
-      document.getElementById("ultims14").textContent = `Últims 14 dies: Color ${ultims14Color}, Blanca ${ultims14Blanca}`;
-      document.getElementById("totals").textContent = `Total des de l'inici: Color ${totalColor}, Blanca ${totalBlanca}`;
+      document.getElementById("ultimos14").textContent = `Últimos 14 días: Color ${ultimos14Color}, Blanco ${ultimos14Blanco}`;
+      document.getElementById("totales").textContent = `Total desde el inicio: Color ${totalColor}, Blanco ${totalBlanco}`;
     }
 
-    actualitzarEstadistiques();
+    actualizarEstadisticas();
   </script>
 </body>
 </html>
